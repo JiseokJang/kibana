@@ -63,13 +63,6 @@ export const ESQL = i18n.translate(
   }
 );
 
-export const PROVIDED = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.loadingCallout.stepDataModal.provided',
-  {
-    defaultMessage: 'Provided',
-  }
-);
-
 export const NO_DATA = i18n.translate(
   'xpack.securitySolution.attackDiscovery.loadingCallout.stepDataModal.noData',
   {
