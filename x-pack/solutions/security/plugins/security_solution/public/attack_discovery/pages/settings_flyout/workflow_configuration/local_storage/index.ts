@@ -16,7 +16,7 @@ export const getWorkflowConfigStorageKey = (spaceId: string): string => {
   return `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${WORKFLOW_CONFIG_LOCAL_STORAGE_KEY}.${spaceId}`;
 };
 
-const VALID_ALERT_RETRIEVAL_MODES = new Set(['custom_only', 'custom_query', 'esql']);
+const VALID_ALERT_RETRIEVAL_MODES = new Set(['custom_query', 'disabled', 'esql']);
 
 /**
  * Validate that the workflow configuration has the correct structure
@@ -29,8 +29,8 @@ const isValidWorkflowConfiguration = (value: unknown): value is WorkflowConfigur
   const config = value as Partial<WorkflowConfiguration>;
 
   return (
-    typeof config.alertRetrievalMode === 'string' &&
-    VALID_ALERT_RETRIEVAL_MODES.has(config.alertRetrievalMode) &&
+    typeof config.defaultAlertRetrievalMode === 'string' &&
+    VALID_ALERT_RETRIEVAL_MODES.has(config.defaultAlertRetrievalMode) &&
     Array.isArray(config.alertRetrievalWorkflowIds) &&
     config.alertRetrievalWorkflowIds.every((id) => typeof id === 'string') &&
     typeof config.validationWorkflowId === 'string' &&
@@ -61,35 +61,26 @@ export const getWorkflowSettings = (spaceId: string): WorkflowConfiguration => {
       delete parsed.promotionWorkflowId;
     }
 
-    // Migrate legacyAlertRetrievalEnabled to alertRetrievalMode
+    // Migrate legacyAlertRetrievalEnabled to defaultAlertRetrievalMode
     if (
       typeof parsed?.legacyAlertRetrievalEnabled === 'boolean' &&
-      typeof parsed?.alertRetrievalMode !== 'string'
+      typeof parsed?.defaultAlertRetrievalMode !== 'string'
     ) {
-      parsed.alertRetrievalMode = parsed.legacyAlertRetrievalEnabled
+      parsed.defaultAlertRetrievalMode = parsed.legacyAlertRetrievalEnabled
         ? 'custom_query'
-        : 'custom_only';
+        : 'disabled';
       delete parsed.legacyAlertRetrievalEnabled;
     }
 
-    // Migrate defaultAlertRetrievalEnabled boolean to alertRetrievalMode enum
+    // Migrate defaultAlertRetrievalEnabled boolean to defaultAlertRetrievalMode enum
     if (
       typeof parsed?.defaultAlertRetrievalEnabled === 'boolean' &&
-      typeof parsed?.alertRetrievalMode !== 'string'
+      typeof parsed?.defaultAlertRetrievalMode !== 'string'
     ) {
-      parsed.alertRetrievalMode = parsed.defaultAlertRetrievalEnabled
+      parsed.defaultAlertRetrievalMode = parsed.defaultAlertRetrievalEnabled
         ? 'custom_query'
-        : 'custom_only';
+        : 'disabled';
       delete parsed.defaultAlertRetrievalEnabled;
-    }
-
-    // Migrate defaultAlertRetrievalMode to alertRetrievalMode
-    if (
-      typeof parsed?.defaultAlertRetrievalMode === 'string' &&
-      typeof parsed?.alertRetrievalMode !== 'string'
-    ) {
-      parsed.alertRetrievalMode = parsed.defaultAlertRetrievalMode;
-      delete parsed.defaultAlertRetrievalMode;
     }
 
     if (!isValidWorkflowConfiguration(parsed)) {

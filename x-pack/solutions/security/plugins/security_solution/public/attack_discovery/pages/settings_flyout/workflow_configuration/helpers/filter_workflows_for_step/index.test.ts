@@ -29,11 +29,11 @@ const defaultValidation: WorkflowItem = {
   tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
 };
 
-const customValidationExample: WorkflowItem = {
-  description: 'Custom validation example',
-  id: 'system-attack-discovery-custom-validation-example',
-  name: 'Attack discovery - Custom validation example',
-  tags: ['Attack discovery', 'Security', 'Example', 'attackDiscovery:custom_validation_example'],
+const esqlExample: WorkflowItem = {
+  description: 'ES|QL example alert retrieval',
+  id: 'esql-example-id',
+  name: 'Attack discovery - ES|QL example alert retrieval',
+  tags: ['Attack discovery', 'Security', 'Example', 'attackDiscovery:esql_example_alert_retrieval'],
 };
 
 const customWorkflow: WorkflowItem = {
@@ -50,10 +50,10 @@ const workflowWithNoTags: WorkflowItem = {
 };
 
 const allWorkflows: WorkflowItem[] = [
-  customValidationExample,
   customWorkflow,
   defaultAlertRetrieval,
   defaultValidation,
+  esqlExample,
   generation,
   workflowWithNoTags,
 ];
@@ -77,10 +77,10 @@ describe('filterWorkflowsForAlertRetrieval', () => {
     expect(result.find((w) => w.id === defaultValidation.id)).toBeUndefined();
   });
 
-  it('excludes the custom validation example workflow', () => {
+  it('includes the ES|QL example alert retrieval workflow', () => {
     const result = filterWorkflowsForAlertRetrieval(allWorkflows);
 
-    expect(result.find((w) => w.id === customValidationExample.id)).toBeUndefined();
+    expect(result.find((w) => w.id === esqlExample.id)).toBeDefined();
   });
 
   it('includes custom (user-created) workflows', () => {
@@ -113,16 +113,16 @@ describe('filterWorkflowsForValidation', () => {
     expect(result.find((w) => w.id === generation.id)).toBeUndefined();
   });
 
+  it('excludes the ES|QL example alert retrieval workflow', () => {
+    const result = filterWorkflowsForValidation(allWorkflows);
+
+    expect(result.find((w) => w.id === esqlExample.id)).toBeUndefined();
+  });
+
   it('includes the default validation workflow', () => {
     const result = filterWorkflowsForValidation(allWorkflows);
 
     expect(result.find((w) => w.id === defaultValidation.id)).toBeDefined();
-  });
-
-  it('includes the custom validation example workflow', () => {
-    const result = filterWorkflowsForValidation(allWorkflows);
-
-    expect(result.find((w) => w.id === customValidationExample.id)).toBeDefined();
   });
 
   it('includes custom (user-created) workflows', () => {

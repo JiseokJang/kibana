@@ -34,19 +34,9 @@ export const getAlertSummaryEsqlQuery = ({
       ? esqlQuery.trimEnd()
       : getDefaultBaseQuery({ alertsIndexPattern, maxAlerts });
 
-  const result = `${baseQuery}
+  return `${baseQuery}
 | STATS Count = count() by \`${tableStackBy0}\`
 | SORT Count DESC
 ${getEsqlKeepStatement(tableStackBy0)}
 `;
-
-  // eslint-disable-next-line no-console
-  console.log('getAlertSummaryEsqlQuery:', {
-    esqlQueryProp: esqlQuery,
-    maxAlerts,
-    tableStackBy0,
-    resultQuery: result,
-  });
-
-  return result;
 };

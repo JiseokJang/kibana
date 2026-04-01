@@ -7,10 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  WORKFLOW_ID_ALIASES_TO_TAGS,
-  resolveWorkflowIdFromAlias,
-} from './helpers/resolve_workflow_id_from_alias';
+import { resolveWorkflowIdFromAlias } from './helpers/resolve_workflow_id_from_alias';
 
 export interface UseWorkflowEditorLinkParams {
   workflowId: string | null | undefined;
@@ -83,27 +80,16 @@ export const useWorkflowEditorLink = ({
       return null;
     }
 
-    // For slug-based IDs not in the alias map, resolvedWorkflowId will be null after the
-    // effect runs (resolveWorkflowIdFromAlias returns null immediately for unknown slugs).
-    // In that case, the workflowId itself is already the actual workflow slug — use it directly.
-    // undefined means alias resolution is still in-flight; show no link until it resolves.
-    // If the workflowId IS a known alias but the workflow wasn't found in the database, return
-    // null rather than producing a broken URL with the alias string as the path segment.
     const effectiveWorkflowId = workflowId.startsWith('workflow-')
       ? workflowId
-      : resolvedWorkflowId === undefined
-      ? undefined
-      : resolvedWorkflowId !== null
-      ? resolvedWorkflowId
-      : workflowId in WORKFLOW_ID_ALIASES_TO_TAGS
-      ? null
-      : workflowId;
-    if (effectiveWorkflowId == null) {
+      : resolvedWorkflowId;
+    if (!effectiveWorkflowId) {
       return null;
     }
 
     const encodedWorkflowId = encodeURIComponent(effectiveWorkflowId);
-    const executionId = workflowRunId ?? undefined;
+    const executionId =
+      workflowRunId && !workflowRunId.startsWith('stub-') ? workflowRunId : undefined;
     const path = executionId
       ? `/${encodedWorkflowId}?tab=executions&executionId=${encodeURIComponent(executionId)}`
       : `/${encodedWorkflowId}`;

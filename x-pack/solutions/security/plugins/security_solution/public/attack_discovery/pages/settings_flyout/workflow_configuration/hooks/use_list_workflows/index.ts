@@ -17,7 +17,6 @@ interface WorkflowSearchResult {
   id: string;
   name: string;
   tags?: string[];
-  definition?: { tags?: string[] } | null;
 }
 
 interface WorkflowSearchResponse {
@@ -36,7 +35,6 @@ export const useListWorkflows = () => {
       }
       return http.get<WorkflowSearchResponse>('/api/workflows', {
         query: {
-          managed: 'all',
           page: 1,
           size: 10000,
         },
@@ -49,7 +47,7 @@ export const useListWorkflows = () => {
 
   return {
     ...result,
-    data: result.data?.results.map((r) => ({ ...r, tags: r.definition?.tags })),
+    data: result.data?.results,
   };
 };
 

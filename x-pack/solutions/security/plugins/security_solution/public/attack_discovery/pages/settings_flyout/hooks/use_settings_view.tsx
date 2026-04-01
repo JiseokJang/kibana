@@ -161,7 +161,7 @@ export const useSettingsView = ({
     }
 
     return (
-      workflowConfiguration.alertRetrievalMode === 'custom_only' &&
+      workflowConfiguration.defaultAlertRetrievalMode === 'disabled' &&
       workflowConfiguration.alertRetrievalWorkflowIds.length === 0
     );
   }, [isWorkflowsEnabled, workflowConfiguration]);
@@ -288,11 +288,11 @@ export const useSettingsView = ({
 
   const getWorkflowConfigTelemetryParams = useCallback(() => {
     const queryMode =
-      draftWorkflowConfiguration.alertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
+      draftWorkflowConfiguration.defaultAlertRetrievalMode === 'esql' ? 'esql' : 'custom_query';
 
     return {
       custom_retrieval_workflow_count: draftWorkflowConfiguration.alertRetrievalWorkflowIds.length,
-      alert_retrieval_mode: draftWorkflowConfiguration.alertRetrievalMode,
+      default_alert_retrieval_mode: draftWorkflowConfiguration.defaultAlertRetrievalMode,
       query_mode: queryMode as 'custom_query' | 'esql',
       uses_default_validation:
         draftWorkflowConfiguration.validationWorkflowId === 'default' ||

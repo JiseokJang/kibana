@@ -77,7 +77,6 @@ describe('useListWorkflows', () => {
     await waitFor(() => {
       expect(mockHttp.get).toHaveBeenCalledWith('/api/workflows', {
         query: {
-          managed: 'all',
           page: 1,
           size: 10000,
         },

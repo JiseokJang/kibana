@@ -20,7 +20,7 @@ import React, { useMemo } from 'react';
 export interface StepAccordionProps {
   children?: React.ReactNode;
   'data-test-subj'?: string;
-  description: React.ReactNode;
+  description: string;
   hasError?: boolean;
   initialIsOpen?: boolean;
   isLast?: boolean;

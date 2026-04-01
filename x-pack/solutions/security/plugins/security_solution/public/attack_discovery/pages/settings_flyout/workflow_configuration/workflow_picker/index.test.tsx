@@ -536,7 +536,7 @@ describe('WorkflowPicker', () => {
         expect(screen.getAllByText('Workflow 2')[0]).toBeInTheDocument();
       });
 
-      fireEvent.click(screen.getAllByText('Workflow 2')[0]);
+      await userEvent.click(screen.getAllByText('Workflow 2')[0]);
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(['workflow-2']);

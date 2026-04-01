@@ -14,6 +14,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Subject } from 'rxjs';
 
+import { THREAT_HUNTING_AGENT_ID } from '../../../../../../common/constants';
 import { TestProviders } from '../../../../../common/mock';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -177,7 +178,7 @@ describe('EditWithAi', () => {
     expect(mockOpenChat).toHaveBeenCalledTimes(1);
   });
 
-  it('does not pass an agentId override to openChat (lets agent builder use its default)', async () => {
+  it('passes the correct agent ID to openChat', async () => {
     render(
       <TestProviders>
         <EditWithAi {...defaultProps} />
@@ -187,8 +188,8 @@ describe('EditWithAi', () => {
     await userEvent.click(screen.getByTestId('editWithAiButton'));
 
     expect(mockOpenChat).toHaveBeenCalledWith(
-      expect.not.objectContaining({
-        agentId: expect.anything(),
+      expect.objectContaining({
+        agentId: THREAT_HUNTING_AGENT_ID,
       })
     );
   });
