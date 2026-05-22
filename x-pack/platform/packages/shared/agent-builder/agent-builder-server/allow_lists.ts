@@ -134,6 +134,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'pci-compliance',
   'siem-readiness',
+  'attack-discovery-alert-retrieval-builder',
+  'attack-discovery-generator',
+  'attack-discovery-workflow-troubleshooting',
 
   // O11Y
   'observability.rca',
