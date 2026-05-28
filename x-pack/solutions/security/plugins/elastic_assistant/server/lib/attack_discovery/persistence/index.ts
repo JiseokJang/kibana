@@ -123,11 +123,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
         : this.getAdHocAlertsIndexPattern();
     }
 
-    logger.debug(
-      () =>
-        `[FIND] Searching for attack discoveries in index: ${index}, user: ${authenticatedUser.username}`
-    );
-
     const filter = combineFindAttackDiscoveryFilters({
       alertIds,
       connectorNames,
@@ -139,15 +134,11 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       status,
     });
 
-    logger.debug(() => `[FIND] Combined filters: ${JSON.stringify(filter, null, 2)}`);
-
     const combinedFilter = getCombinedFilter({
       authenticatedUser,
       filter,
       shared,
     });
-
-    logger.debug(() => `[FIND] Final filter with auth: ${JSON.stringify(combinedFilter, null, 2)}`);
 
     const result = await findDocuments<AttackDiscoveryAlertDocument>({
       aggs,
@@ -161,11 +152,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       sortOrder: sortOrder as estypes.SortOrder,
     });
 
-    logger.debug(
-      () =>
-        `[FIND] Elasticsearch returned ${result.data.hits.hits.length} hits out of ${result.data.hits.total} total`
-    );
-
     const {
       connectorNames: alertConnectorNames,
       data,
@@ -178,15 +164,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       enableFieldRendering,
       withReplacements,
     });
-
-    logger.debug(
-      () =>
-        `[FIND] After transformation: ${
-          data.length
-        } discoveries, connectorNames: [${alertConnectorNames.join(
-          ', '
-        )}], uniqueAlertIdsCount: ${uniqueAlertIdsCount}`
-    );
 
     return {
       connector_names: alertConnectorNames,
@@ -219,22 +196,20 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     authenticatedUser: AuthenticatedUser;
     eventLogIndex: string;
     getAttackDiscoveryGenerationsParams: {
-      end?: string;
-      scheduled?: boolean;
       size: number;
       start?: string;
+      end?: string;
     };
     logger: Logger;
     spaceId: string;
   }): Promise<GetAttackDiscoveryGenerationsResponse> => {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const { end, scheduled, size, start } = getAttackDiscoveryGenerationsParams;
+    const { size, start, end } = getAttackDiscoveryGenerationsParams;
     const generationsQuery = getAttackDiscoveryGenerationsQuery({
       authenticatedUser,
       end,
       eventLogIndex,
-      scheduled,
       size,
       spaceId,
       start,
