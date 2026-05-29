@@ -78,6 +78,9 @@ const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
           },
         },
       },
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
