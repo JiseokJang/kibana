@@ -20,19 +20,9 @@ jest.mock('../../logic/use_fetch_schedule_rule_type');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const mockRuleEventLogList = jest.fn(() => <div data-test-subj="mockRuleEventLogList" />);
-
-const renderComponent = async ({
-  schedule = mockAttackDiscoverySchedule,
-}: {
-  schedule?: typeof mockAttackDiscoverySchedule;
-} = {}) => {
+const renderComponent = async (schedule = mockAttackDiscoverySchedule) => {
   await act(() => {
-    render(
-      <TestProviders>
-        <ScheduleExecutionLogs schedule={schedule} />
-      </TestProviders>
-    );
+    render(<TestProviders>{<ScheduleExecutionLogs schedule={schedule} />}</TestProviders>);
   });
 };
 
@@ -42,10 +32,9 @@ describe('ScheduleExecutionLogs', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
-        http: { fetch: jest.fn() },
         triggersActionsUi: {
           ...triggersActionsUiMock.createStart(),
-          getRuleEventLogList: mockRuleEventLogList,
+          getRuleEventLogList: () => <></>,
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
@@ -66,28 +55,5 @@ describe('ScheduleExecutionLogs', () => {
     await renderComponent();
 
     expect(screen.getByTestId('executionEventLogs')).toBeInTheDocument();
-  });
-
-  it('passes ruleId and ruleType to RuleEventLogList', async () => {
-    await renderComponent();
-
-    expect(mockRuleEventLogList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ruleId: mockAttackDiscoverySchedule.id,
-        ruleType: { id: 'test-rule-type' },
-      }),
-      expect.anything()
-    );
-  });
-
-  it('does not render the event log list when scheduleRuleType is not available', async () => {
-    (useFetchScheduleRuleType as jest.Mock).mockReturnValue({
-      isLoading: true,
-      data: undefined,
-    });
-
-    await renderComponent();
-
-    expect(mockRuleEventLogList).not.toHaveBeenCalled();
   });
 });

@@ -7,6 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { useWorkflowEditorLink } from '.';
+import { clearResolvedWorkflowIdCache } from './helpers/resolve_workflow_id_from_alias';
 import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');
@@ -21,6 +22,7 @@ describe('useWorkflowEditorLink', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearResolvedWorkflowIdCache();
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -173,47 +175,9 @@ describe('useWorkflowEditorLink', () => {
     });
   });
 
-  describe('when workflowRunId starts with "stub-"', () => {
-    const workflowId = 'workflow-123';
-    const stubWorkflowRunId = 'stub-46654f85-2a89-44b7-b942-0726bc56f9d9';
-
-    beforeEach(() => {
-      mockGetUrlForApp.mockReturnValue('/app/workflows/workflow-123');
-    });
-
-    it('returns the workflow editor URL without the executions tab', () => {
-      const { result } = renderHook(() =>
-        useWorkflowEditorLink({ workflowId, workflowRunId: stubWorkflowRunId })
-      );
-
-      expect(result.current.editorUrl).toBe('/app/workflows/workflow-123');
-    });
-
-    it('calls getUrlForApp with a path that does NOT include the executions tab', () => {
-      renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId: stubWorkflowRunId }));
-
-      expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows', {
-        path: '/workflow-123',
-      });
-    });
-
-    it('navigates to the workflow editor when navigateToEditor is called', () => {
-      const { result } = renderHook(() =>
-        useWorkflowEditorLink({ workflowId, workflowRunId: stubWorkflowRunId })
-      );
-
-      result.current.navigateToEditor();
-
-      expect(mockNavigateToApp).toHaveBeenCalledWith('workflows', {
-        openInNewTab: true,
-        path: '/workflow-123',
-      });
-    });
-  });
-
   describe('when workflowId is an alias', () => {
     const workflowId = 'attack-discovery-generation';
-    const workflowRunId = 'stub-46654f85-2a89-44b7-b942-0726bc56f9d9';
+    const workflowRunId = null;
 
     beforeEach(() => {
       mockHttpFetch.mockResolvedValue({
@@ -227,6 +191,76 @@ describe('useWorkflowEditorLink', () => {
 
       await waitFor(() => {
         expect(result.current.editorUrl).toBe('/app/workflows/workflow-abc');
+      });
+    });
+  });
+
+  describe('when workflowId is a known alias but the API returns no results', () => {
+    const workflowId = 'attack-discovery-custom-validation-example';
+    const workflowRunId = null;
+
+    beforeEach(() => {
+      mockHttpFetch.mockResolvedValue({ results: [] });
+    });
+
+    it('returns null for editorUrl to prevent a broken link', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).toBeNull();
+      });
+    });
+
+    it('does not call getUrlForApp', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.resolvedWorkflowId).toBeNull();
+      });
+
+      expect(mockGetUrlForApp).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when workflowId is a custom slug not in the alias map', () => {
+    const workflowId = 'validation-with-transform';
+    const workflowRunId = 'run-val-123';
+
+    beforeEach(() => {
+      mockGetUrlForApp.mockReturnValue(
+        '/app/workflows/validation-with-transform?tab=executions&executionId=run-val-123'
+      );
+    });
+
+    it('returns an editor URL using workflowId directly as the slug', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).toBe(
+          '/app/workflows/validation-with-transform?tab=executions&executionId=run-val-123'
+        );
+      });
+    });
+
+    it('does not call the workflows search API for custom slugs', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).not.toBeNull();
+      });
+
+      expect(mockHttpFetch).not.toHaveBeenCalled();
+    });
+
+    it('calls getUrlForApp with the custom slug directly in the path', async () => {
+      const { result } = renderHook(() => useWorkflowEditorLink({ workflowId, workflowRunId }));
+
+      await waitFor(() => {
+        expect(result.current.editorUrl).not.toBeNull();
+      });
+
+      expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows', {
+        path: '/validation-with-transform?tab=executions&executionId=run-val-123',
       });
     });
   });

@@ -9,7 +9,6 @@ import type { HttpSetup } from '@kbn/core/public';
 
 export const WORKFLOW_ID_ALIASES_TO_TAGS: Readonly<Record<string, string>> = {
   'attack-discovery-custom-validation-example': 'attackDiscovery:custom_validation_example',
-  'attack-discovery-esql-example': 'attackDiscovery:esql_example_alert_retrieval',
   'attack-discovery-generation': 'attackDiscovery:generation',
   'attack-discovery-run-example': 'attackDiscovery:run_example',
   'attack-discovery-validate': 'attackDiscovery:validate',
@@ -47,6 +46,7 @@ export const resolveWorkflowIdFromAlias = async ({
     }>('/api/workflows', {
       method: 'GET',
       query: {
+        managed: 'all',
         page: 1,
         size: 1,
         tags: tag,
