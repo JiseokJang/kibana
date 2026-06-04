@@ -18,11 +18,13 @@ spaceTest.describe('Graph listing page', { tag: tags.stateful.classic }, () => {
       type: 'graph-workspace',
       attributes: { ...GRAPH_A, ...WORKSPACE_ATTRS },
       space: scoutSpace.id,
+      overwrite: true,
     });
     await kbnClient.savedObjects.create({
       type: 'graph-workspace',
       attributes: { ...GRAPH_B, ...WORKSPACE_ATTRS },
       space: scoutSpace.id,
+      overwrite: true,
     });
   });
 
